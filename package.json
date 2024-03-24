@@ -9,6 +9,7 @@
     "lint": "next lint",
     "db:generate": "drizzle-kit generate:pg",
     "db:migrate": "tsx src/lib/db/migrate.ts",
+    "db:seed": "tsx src/lib/db/seed.ts",
     "db:drop": "drizzle-kit drop",
     "db:pull": "drizzle-kit introspect:pg",
     "db:studio": "drizzle-kit studio",
@@ -23,6 +24,7 @@
     "drizzle-orm": "^0.30.4",
     "drizzle-zod": "^0.5.1",
     "lucide-react": "^0.363.0",
+    "nanoid": "^5.0.6",
     "next": "14.1.4",
     "next-auth": "^4.24.7",
     "postgres": "^3.4.4",
@@ -33,6 +35,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
