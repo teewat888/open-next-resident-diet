@@ -1,14 +1,11 @@
-import { generatePublicId, timestamps } from '@/lib/utils';
+import { timestamps } from '@/lib/utils';
 import { sql } from 'drizzle-orm';
-import { pgTable, text } from 'drizzle-orm/pg-core';
+import { integer, pgTable, text } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 export const wings = pgTable('wings', {
-  id: text('id')
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => generatePublicId()),
+  id: integer('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
   createdAt: text('created_at')
@@ -35,7 +32,6 @@ export type UpdateWingParams = z.infer<typeof updateWingParams>;
 export type WingId = z.infer<typeof wingIdSchema>['id'];
 
 export const wingValidationSchema = z.object({
-  id: z.string(),
   name: z
     .string()
     .min(1, { message: 'Name is required' })

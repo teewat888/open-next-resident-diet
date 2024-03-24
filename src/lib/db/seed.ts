@@ -23,22 +23,14 @@ const runSeed = async () => {
 
   //wings data seed
   const wingsData: (typeof wings.$inferInsert)[] = [
-    {
-      name: 'Willows',
-      description: 'Willows are a type of tree.',
-    },
-    { name: 'Oaks', description: 'Oaks are a type of tree.' },
-    { name: 'Junipers', description: 'Junipers are a type of tree.' },
-    { name: 'Acacias', description: 'Acacias are a type of tree.' },
-    { name: 'Palms', description: 'Palms are a type of tree.' },
-    { name: 'Myrtle', description: 'Myrtle are a type of tree.' },
+    { id: 1, name: 'Willows', description: 'Willows are a type of tree.' },
+    { id: 2, name: 'Oaks', description: 'Oaks are a type of tree.' },
+    { id: 3, name: 'Junipers', description: 'Junipers are a type of tree.' },
+    { id: 4, name: 'Acacias', description: 'Acacias are a type of tree.' },
+    { id: 5, name: 'Palms', description: 'Palms are a type of tree.' },
+    { id: 6, name: 'Myrtle', description: 'Myrtle are a type of tree.' },
   ];
-  // for (let i = 0; i < 6; i++) {
-  //   wingsData.push({
-  //     name: faker.lorem.words(3),
-  //     description: faker.lorem.words(10),
-  //   });
-  // }
+
   await db.insert(wings).values(wingsData);
   console.log('🌱 Seeded wings data');
   //end wings data seed
