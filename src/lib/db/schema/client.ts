@@ -3,7 +3,7 @@ import { integer, pgTable, text } from 'drizzle-orm/pg-core';
 import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const clients = pgTable('clients', {
+export const client = pgTable('client', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => generatePublicId()),
@@ -19,16 +19,16 @@ export const clients = pgTable('clients', {
   updatedAt: text('updated_at').notNull().default('now()'),
 });
 
-const baseSchema = createSelectSchema(clients).omit(timestamps);
+const baseSchema = createSelectSchema(client).omit(timestamps);
 
-export const insertClientSchema = createInsertSchema(clients).omit(timestamps);
+export const insertClientSchema = createInsertSchema(client).omit(timestamps);
 export const insertClientParams = baseSchema.extend({}).omit({ id: true });
 
 export const updateClientSchema = baseSchema;
 export const updateClientParams = baseSchema.extend({}).omit({ id: true });
 export const clientIdSchema = baseSchema.pick({ id: true });
 
-export type Client = typeof clients.$inferSelect;
+export type Client = typeof client.$inferSelect;
 export type NewClient = z.infer<typeof insertClientSchema>;
 export type NewClientParams = z.infer<typeof insertClientParams>;
 export type UpdateClientParams = z.infer<typeof updateClientParams>;

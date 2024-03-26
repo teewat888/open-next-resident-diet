@@ -2,17 +2,17 @@ import { pgTable, text, serial } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const drinkConsistencies = pgTable('drink_consistency', {
+export const drinkConsistency = pgTable('drink_consistency', {
   id: serial('id').primaryKey(),
   drink_consistency_name: text('drink_consistency_name').notNull(),
   drink_consistency_symbol: text('drink_consistency_symbol').notNull(),
   drink_consistency_description: text('drink_consistency_description'),
 });
 
-const baseSchema = createSelectSchema(drinkConsistencies);
+const baseSchema = createSelectSchema(drinkConsistency);
 
 export const insertDrinkConsistencySchema =
-  createInsertSchema(drinkConsistencies);
+  createInsertSchema(drinkConsistency);
 export const insertDrinkConsistencyParams = baseSchema
   .extend({})
   .omit({ id: true });
@@ -23,7 +23,7 @@ export const updateDrinkConsistencyParams = baseSchema
   .omit({ id: true });
 export const drinkConsistencyIdSchema = baseSchema.pick({ id: true });
 
-export type DrinkConsistency = typeof drinkConsistencies.$inferSelect;
+export type DrinkConsistency = typeof drinkConsistency.$inferSelect;
 export type NewDrinkConsistency = z.infer<typeof insertDrinkConsistencySchema>;
 export type NewDrinkConsistencyParams = z.infer<
   typeof insertDrinkConsistencyParams

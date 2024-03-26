@@ -4,7 +4,7 @@ import { integer, pgTable, text } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const wings = pgTable('wings', {
+export const wing = pgTable('wing', {
   id: integer('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
@@ -16,16 +16,16 @@ export const wings = pgTable('wings', {
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
-const baseSchema = createSelectSchema(wings).omit(timestamps);
+const baseSchema = createSelectSchema(wing).omit(timestamps);
 
-export const insertWingSchema = createInsertSchema(wings).omit(timestamps);
+export const insertWingSchema = createInsertSchema(wing).omit(timestamps);
 export const insertWingParams = baseSchema.extend({}).omit({ id: true });
 
 export const updateWingSchema = baseSchema;
 export const updateWingParams = baseSchema.extend({}).omit({ id: true });
 export const wingIdSchema = baseSchema.pick({ id: true });
 
-export type Wing = typeof wings.$inferSelect;
+export type Wing = typeof wing.$inferSelect;
 export type NewWing = z.infer<typeof insertWingSchema>;
 export type NewWingParams = z.infer<typeof insertWingParams>;
 export type UpdateWingParams = z.infer<typeof updateWingParams>;

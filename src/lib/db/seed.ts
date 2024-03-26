@@ -2,7 +2,7 @@ import { env } from '@/lib/env.mjs';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { faker } from '@faker-js/faker';
-import { wings } from './schema/wings';
+import { wing } from './schema/wing';
 import { sql } from 'drizzle-orm';
 
 const runSeed = async () => {
@@ -22,7 +22,7 @@ const runSeed = async () => {
   const start = Date.now();
 
   //wings data seed
-  const wingsData: (typeof wings.$inferInsert)[] = [
+  const wingsData: (typeof wing.$inferInsert)[] = [
     { id: 1, name: 'Willows', description: 'Willows are a type of tree.' },
     { id: 2, name: 'Oaks', description: 'Oaks are a type of tree.' },
     { id: 3, name: 'Junipers', description: 'Junipers are a type of tree.' },
@@ -31,7 +31,7 @@ const runSeed = async () => {
     { id: 6, name: 'Myrtle', description: 'Myrtle are a type of tree.' },
   ];
 
-  await db.insert(wings).values(wingsData);
+  await db.insert(wing).values(wingsData);
   console.log('🌱 Seeded wings data');
   //end wings data seed
 
