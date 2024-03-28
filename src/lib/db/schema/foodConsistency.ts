@@ -7,6 +7,7 @@ export const foodConsistency = pgTable('food_consistency', {
   food_consistency_name: text('food_consistency_name').notNull(),
   food_consistency_symbol: text('food_consistency_symbol').notNull(),
   food_consistency_description: text('food_consistency_description'),
+  food_consistency_color: text('food_consistency_color'),
 });
 
 const baseSchema = createSelectSchema(foodConsistency);

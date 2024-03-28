@@ -3,7 +3,7 @@ import { pgTable, text, integer, primaryKey } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const ClientAllergy = pgTable(
+export const clientAllergy = pgTable(
   'client_allergy',
   {
     client_id: text('client_id'),
@@ -23,10 +23,10 @@ export const ClientAllergy = pgTable(
   }
 );
 
-const baseSchema = createSelectSchema(ClientAllergy).omit(timestamps);
+const baseSchema = createSelectSchema(clientAllergy).omit(timestamps);
 
 export const insertClientAllergySchema =
-  createInsertSchema(ClientAllergy).omit(timestamps);
+  createInsertSchema(clientAllergy).omit(timestamps);
 export const insertClientAllergyParams = baseSchema.extend({});
 
 export const updateClientAllergySchema = baseSchema;
@@ -36,7 +36,7 @@ export const ClientAllergyIdSchema = baseSchema.pick({
   allergy_id: true,
 });
 
-export type ClientAllergy = typeof ClientAllergy.$inferSelect;
+export type ClientAllergy = typeof clientAllergy.$inferSelect;
 export type NewClientAllergy = z.infer<typeof insertClientAllergySchema>;
 export type NewClientAllergyParams = z.infer<typeof insertClientAllergyParams>;
 export type UpdateClientAllergyParams = z.infer<

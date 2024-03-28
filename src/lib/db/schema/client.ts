@@ -10,8 +10,6 @@ export const client = pgTable('client', {
   firstName: text('first_names').notNull(),
   lastName: text('last_name').notNull(),
   photo: text('photo'),
-  room_id: integer('room_id'),
-  wing_id: integer('wing_id'),
   meal_size_id: integer('meal_size_id').notNull(),
   food_consistency_id: integer('food_consistency_id').notNull(),
   liquid_consistency_id: integer('liquid_consistency_id').notNull(),

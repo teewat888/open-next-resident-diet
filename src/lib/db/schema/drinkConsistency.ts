@@ -7,6 +7,7 @@ export const drinkConsistency = pgTable('drink_consistency', {
   drink_consistency_name: text('drink_consistency_name').notNull(),
   drink_consistency_symbol: text('drink_consistency_symbol').notNull(),
   drink_consistency_description: text('drink_consistency_description'),
+  drink_consistency_color: text('drink_consistency_color'),
 });
 
 const baseSchema = createSelectSchema(drinkConsistency);
