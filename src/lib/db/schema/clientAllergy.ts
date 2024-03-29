@@ -1,4 +1,5 @@
 import { timestamps } from '@/lib/utils';
+import { sql } from 'drizzle-orm';
 import { pgTable, text, integer, primaryKey } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -9,8 +10,12 @@ export const clientAllergy = pgTable(
     client_id: text('client_id'),
     allergy_id: integer('allergy_id'),
     severity: text('severity'),
-    createdAt: text('created_at').notNull().default('now()'),
-    updatedAt: text('updated_at').notNull().default('now()'),
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => {
     return {

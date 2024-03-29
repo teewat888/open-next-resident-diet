@@ -1,10 +1,11 @@
 import { timestamps } from '@/lib/utils';
+import { sql } from 'drizzle-orm';
 
 import { pgTable, text, integer, bigserial, pgEnum } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-const statusEnum = pgEnum('status', [
+export const statusEnum = pgEnum('status', [
   'active',
   'schduled',
   'completed',
@@ -18,8 +19,12 @@ export const clientRoom = pgTable('client_room', {
   start_date: text('start_date').notNull(),
   end_date: text('end_date'),
   status: statusEnum('status'),
-  createdAt: text('created_at').notNull().default('now()'),
-  updatedAt: text('updated_at').notNull().default('now()'),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
 const baseSchema = createSelectSchema(clientRoom).omit(timestamps);

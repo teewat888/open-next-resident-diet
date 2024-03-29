@@ -6,8 +6,8 @@ import { wing } from './schema/wing';
 import { sql } from 'drizzle-orm';
 import {
   MealSize,
-  drinkConsistency,
   foodConsistency,
+  liquidConsistency,
   mealSize,
   room,
 } from './schema';
@@ -24,6 +24,13 @@ const runSeed = async () => {
   console.log('⏳ Resetting database...');
   await db.execute(sql`TRUNCATE TABLE wing RESTART IDENTITY CASCADE`);
   await db.execute(sql`TRUNCATE TABLE room RESTART IDENTITY CASCADE`);
+  await db.execute(
+    sql`TRUNCATE TABLE food_consistency RESTART IDENTITY CASCADE`
+  );
+  await db.execute(
+    sql`TRUNCATE TABLE liquid_consistency RESTART IDENTITY CASCADE`
+  );
+  await db.execute(sql`TRUNCATE TABLE meal_size RESTART IDENTITY CASCADE`);
 
   console.log('⏳ Running seed...');
 
@@ -152,45 +159,47 @@ const runSeed = async () => {
       food_consistency_color: 'rgb(255, 255, 40)',
     },
   ];
+  await db.insert(foodConsistency).values(foodConsistencyData);
   // end food consistency data seed
   // drink consistency data seed
-  const drinkConsistencyData: (typeof drinkConsistency.$inferInsert)[] = [
+  const drinkConsistencyData: (typeof liquidConsistency.$inferInsert)[] = [
     {
       id: 1,
-      drink_consistency_name: 'Thin',
-      drink_consistency_symbol: 'T',
-      drink_consistency_description: 'Thin liquid consistency',
-      drink_consistency_color: 'rgb(255, 255, 255)',
+      liquid_consistency_name: 'Thin',
+      liquid_consistency_symbol: 'T',
+      liquid_consistency_description: 'Thin liquid consistency',
+      liquid_consistency_color: 'rgb(255, 255, 255)',
     },
     {
       id: 2,
-      drink_consistency_name: 'Slightly Thick',
-      drink_consistency_symbol: 'NT',
-      drink_consistency_description: 'Slightly Thick liquid consistency',
-      drink_consistency_color: 'rgb(102, 102, 102)',
+      liquid_consistency_name: 'Slightly Thick',
+      liquid_consistency_symbol: 'NT',
+      liquid_consistency_description: 'Slightly Thick liquid consistency',
+      liquid_consistency_color: 'rgb(102, 102, 102)',
     },
     {
       id: 3,
-      drink_consistency_name: 'Mildly Thick',
-      drink_consistency_symbol: 'HT',
-      drink_consistency_description: 'Mildly Thick liquid consistency',
-      drink_consistency_color: 'rgb(234, 78, 150)',
+      liquid_consistency_name: 'Mildly Thick',
+      liquid_consistency_symbol: 'HT',
+      liquid_consistency_description: 'Mildly Thick liquid consistency',
+      liquid_consistency_color: 'rgb(234, 78, 150)',
     },
     {
       id: 4,
-      drink_consistency_name: 'Moderately Thick',
-      drink_consistency_symbol: 'ST',
-      drink_consistency_description: 'Spoon Thick liquid consistency',
-      drink_consistency_color: 'rgb(255, 255, 40)',
+      liquid_consistency_name: 'Moderately Thick',
+      liquid_consistency_symbol: 'ST',
+      liquid_consistency_description: 'Spoon Thick liquid consistency',
+      liquid_consistency_color: 'rgb(255, 255, 40)',
     },
     {
       id: 5,
-      drink_consistency_name: 'Extremely Thick',
-      drink_consistency_symbol: 'VT',
-      drink_consistency_description: 'Extremely Thick liquid consistency',
-      drink_consistency_color: 'rgb(117, 182, 67)',
+      liquid_consistency_name: 'Extremely Thick',
+      liquid_consistency_symbol: 'VT',
+      liquid_consistency_description: 'Extremely Thick liquid consistency',
+      liquid_consistency_color: 'rgb(117, 182, 67)',
     },
   ];
+  await db.insert(liquidConsistency).values(drinkConsistencyData);
   //end drink consistency data seed
 
   const end = Date.now();

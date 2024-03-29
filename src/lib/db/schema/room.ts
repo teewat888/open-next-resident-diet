@@ -3,14 +3,19 @@ import { wing } from './wing';
 import { z } from 'zod';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { timestamps } from '@/lib/utils';
+import { sql } from 'drizzle-orm';
 
 export const room = pgTable('room', {
   id: serial('id').primaryKey(),
   room_number: text('room_number').notNull(),
   capacity: smallint('capacity').notNull().default(1),
   wing_id: integer('wing_id').references(() => wing.id),
-  createdAt: text('created_at').notNull().default('now()'),
-  updatedAt: text('updated_at').notNull().default('now()'),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
 });
 
 const baseSchema = createSelectSchema(room).omit(timestamps);
