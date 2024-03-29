@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function ClientManagementPage() {
   return (
@@ -14,7 +15,10 @@ export default function ClientManagementPage() {
           <p className='text-sm text-muted-foreground'>
             You can start selling as soon as you add a product.
           </p>
-          <Button className='mt-4'>Add Product</Button>
+          <Link href='/admin/client/new'>
+            {' '}
+            <Button className='mt-4'>Add Client</Button>
+          </Link>
         </div>
       </div>
     </main>
