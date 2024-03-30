@@ -4,6 +4,8 @@ import { sql } from 'drizzle-orm';
 import { pgTable, text, integer, bigserial, pgEnum } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
+import { client } from './client';
+import { room } from './room';
 
 export const statusEnum = pgEnum('status', [
   'active',
@@ -14,8 +16,8 @@ export const statusEnum = pgEnum('status', [
 
 export const clientRoom = pgTable('client_room', {
   client_room_id: bigserial('client_room_id', { mode: 'bigint' }).primaryKey(),
-  client_id: text('client_id'),
-  room_id: integer('room_id'),
+  client_id: text('client_id').references(() => client.id),
+  room_id: integer('room_id').references(() => room.id),
   start_date: text('start_date').notNull(),
   end_date: text('end_date'),
   status: statusEnum('status'),

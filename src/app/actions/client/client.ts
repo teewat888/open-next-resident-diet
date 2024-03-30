@@ -8,6 +8,7 @@ import {
   toFormState,
 } from '@/lib/utils/fromErrorToFormState';
 import { writeFile } from 'fs/promises';
+import { eq } from 'drizzle-orm';
 import { join } from 'path';
 
 export async function createClient(formState: FormState, formData: FormData) {
@@ -44,4 +45,8 @@ export async function createClient(formState: FormState, formData: FormData) {
   }
 
   return toFormState('SUCCESS', 'Client created successfully', insertedId);
+}
+
+export async function getClientInfo(params: string) {
+  return await db.select().from(client).where(eq(client.id, params)).limit(1);
 }

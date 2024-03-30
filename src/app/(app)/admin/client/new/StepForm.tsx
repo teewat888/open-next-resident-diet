@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useFormState } from 'react-dom';
 
-const StepForm1 = () => {
+const StepForm = () => {
   const [photoSrc, setPhotoSrc] = useState('');
   const [formState, action] = useFormState(createClient, EMPTY_FORM_STATE);
 
@@ -29,19 +29,12 @@ const StepForm1 = () => {
 
   useEffect(() => {
     if (formState.status === 'SUCCESS') {
-      console.log('id=', formState.id);
+      router.push(`/admin/client/room/edit/${formState.id}`);
     }
   }, [formState, router]);
 
   return (
     <>
-      <ul className='steps'>
-        <li className='step step-neutral'>General Info</li>
-        <li className='step '>Location</li>
-        <li className='step'>Meal size and consistency</li>
-        <li className='step'>Done</li>
-      </ul>
-
       <div className='relative flex-col items-start gap-8 md:flex pt-6'>
         <form action={action} className='grid w-full items-start gap-6'>
           <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-1/2 m-auto'>
@@ -81,4 +74,4 @@ const StepForm1 = () => {
     </>
   );
 };
-export default StepForm1;
+export default StepForm;
