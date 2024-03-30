@@ -4,6 +4,7 @@ import { getAvailableRooms, getClientInfo, getWings } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 
 import { Label } from '@/components/ui/label';
+
 import {
   Select,
   SelectContent,
@@ -12,12 +13,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Client, Room, Wing } from '@/lib/db/schema';
-import { useEffect, useState } from 'react';
+
+import { ChangeEvent, useEffect, useState } from 'react';
 
 const StepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
   const [client, setClient] = useState({} as Client);
   const [rooms, setRooms] = useState([] as Room[]);
+  const [selectedRoom, setSelectedRoom] = useState('');
 
   const wingOptions = wings.map((wing) => (
     <SelectItem key={wing.id} value={wing.id.toString()}>
@@ -50,7 +53,7 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   return (
     <>
       <div className='relative flex-col items-start gap-8 md:flex pt-6'>
-        <form className='grid w-full items-start gap-6'>
+        <form action={() => {}} className='grid w-full items-start gap-6'>
           <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-1/2 m-auto'>
             <fieldset
               className={`grid gap-6 rounded-lg border p-4 
@@ -69,19 +72,46 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                 </Select>
               </div>
               {rooms.length > 0 && (
-                <div className='grid gap-3'>
-                  <Label htmlFor='room'>Select a room</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select a room' />
-                    </SelectTrigger>
-                    <SelectContent>{roomOptions}</SelectContent>
-                  </Select>
-                </div>
+                <>
+                  <div className='grid gap-3'>
+                    <Label htmlFor='room'>Select a room</Label>
+                    <Select
+                      name={'room'}
+                      onValueChange={(e: string) => {
+                        setSelectedRoom(e);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select a room' />
+                      </SelectTrigger>
+                      <SelectContent>{roomOptions}</SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+              {selectedRoom && (
+                <>
+                  <div className='flex gap-4'>
+                    <Button
+                      type='button'
+                      className='w-1/2'
+                      variant={'secondary'}
+                    >
+                      Permanent stay
+                    </Button>
+                    <Button
+                      type='button'
+                      className='w-1/2'
+                      variant={'secondary'}
+                    >
+                      Temporary stay
+                    </Button>
+                  </div>
+                </>
               )}
             </fieldset>
             <div className='flex justify-end gap-4'>
-              <Button type='button' className='w-1/2' variant={'outline'}>
+              <Button type='button' className='w-1/2' variant={'secondary'}>
                 Skip
               </Button>
               <Button type='submit' className='w-1/2'>
