@@ -2,7 +2,6 @@
 import { getAvailableRooms, getClientInfo, getWings } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
-
 import { Label } from '@/components/ui/label';
 
 import {
@@ -12,15 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Client, Room, Wing } from '@/lib/db/schema';
 
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ClientRoomForm } from './ClientRoomForm';
 
 const StepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
   const [client, setClient] = useState({} as Client);
   const [rooms, setRooms] = useState([] as Room[]);
   const [selectedRoom, setSelectedRoom] = useState('');
+  const [selectedWing, setSelectedWing] = useState('' as Wing['id'] | '0');
 
   const wingOptions = wings.map((wing) => (
     <SelectItem key={wing.id} value={wing.id.toString()}>
@@ -38,6 +40,7 @@ const StepForm = ({ clientId }: { clientId: string }) => {
     (async () => {
       const rooms = await getAvailableRooms(value);
       setRooms(rooms);
+      setSelectedWing(value as Wing['id'] | '0');
     })();
   };
 
@@ -60,7 +63,11 @@ const StepForm = ({ clientId }: { clientId: string }) => {
               }`}
             >
               <legend className='-ml-1 px-1 text-sm font-medium'>
-                Location for {client.firstName} {client.lastName}
+                {client.firstName ? (
+                  `Location for ${client.firstName} ${client.lastName}`
+                ) : (
+                  <Skeleton className='h-4 w-[200px]' />
+                )}
               </legend>
               <div className='grid gap-3'>
                 <Label htmlFor='wing'>Select a wing</Label>
@@ -92,20 +99,18 @@ const StepForm = ({ clientId }: { clientId: string }) => {
               {selectedRoom && (
                 <>
                   <div className='flex gap-4'>
-                    <Button
-                      type='button'
-                      className='w-1/2'
-                      variant={'secondary'}
-                    >
-                      Permanent stay
-                    </Button>
-                    <Button
-                      type='button'
-                      className='w-1/2'
-                      variant={'secondary'}
-                    >
-                      Temporary stay
-                    </Button>
+                    <ClientRoomForm
+                      mode={'permanent'}
+                      client={client}
+                      selectedRoom={selectedRoom}
+                      selectedWing={selectedWing.toString()}
+                    />
+                    <ClientRoomForm
+                      mode={'temporary'}
+                      client={client}
+                      selectedRoom={selectedRoom}
+                      selectedWing={selectedWing.toString()}
+                    />
                   </div>
                 </>
               )}

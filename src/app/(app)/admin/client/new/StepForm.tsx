@@ -1,6 +1,8 @@
 'use client';
 import { createClient } from '@/app/actions';
 import { FieldError } from '@/components/composed/FieldError';
+import Loading from '@/components/composed/Loading';
+import { SubmitButton } from '@/components/composed/SubmitButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -64,9 +66,11 @@ const StepForm = () => {
               )}
             </fieldset>
             <div className='flex justify-end'>
-              <Button type='submit' className='w-1/2'>
-                Next
-              </Button>
+              <SubmitButton
+                label={'Next'}
+                loading={<Loading />}
+                variant={'default'}
+              />
             </div>
           </div>
         </form>

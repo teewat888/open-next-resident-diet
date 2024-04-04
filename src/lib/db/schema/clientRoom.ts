@@ -6,6 +6,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 import { client } from './client';
 import { room } from './room';
+import { DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE } from '@/constant/validation';
 
 export const statusEnum = pgEnum('status', [
   'active',
@@ -49,6 +50,25 @@ export type NewClientRoomParams = z.infer<typeof insertClientRoomParams>;
 export type UpdateClientRoomParams = z.infer<typeof updateClientRoomParams>;
 export type ClientRoomId = z.infer<typeof clientRoomIdSchema>['client_room_id'];
 
-export const clientRoomValidationSchema = z.object({
-  // Add your validation schema here
-});
+export const clientRoomValidationSchema = z
+  .object({
+    client_id: z.string(),
+    room_id: z.number(),
+    start_date: z.string(),
+    end_date: z.string().optional(),
+    status: statusEnum as unknown as z.ZodType<typeof statusEnum>,
+  })
+  .refine(
+    (data) => {
+      if (data.end_date && data.start_date) {
+        const startDate = new Date(data.start_date);
+        const endDate = new Date(data.end_date);
+        return startDate < endDate;
+      }
+      return true;
+    },
+    {
+      message: DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE,
+      path: ['end_date'],
+    }
+  );

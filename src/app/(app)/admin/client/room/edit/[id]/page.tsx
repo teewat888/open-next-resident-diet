@@ -1,4 +1,4 @@
-import { StepMenu } from '@/components/composed/StepMenu';
+import { Stepper } from '@/components/composed/Stepper';
 import StepForm from './StepForm';
 
 export default async function editRoom({ params }: { params: { id: string } }) {
@@ -7,7 +7,7 @@ export default async function editRoom({ params }: { params: { id: string } }) {
       <div className='flex items-center'>
         <h1 className='text-lg font-semibold md:text-2xl'>Add a client</h1>
       </div>
-      <StepMenu currentStep='Location' />
+      <Stepper currentStep='Location' />
       <StepForm clientId={params.id} />
     </main>
   );
