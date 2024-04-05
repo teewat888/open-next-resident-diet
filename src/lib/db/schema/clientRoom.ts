@@ -8,12 +8,13 @@ import { client } from './client';
 import { room } from './room';
 import { DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE } from '@/constant/validation';
 
-export const statusEnum = pgEnum('status', [
+const clientRoomStatus = [
   'active',
   'schduled',
   'completed',
   'cancelled',
-]);
+] as const;
+export const statusEnum = pgEnum('status', clientRoomStatus);
 
 export const clientRoom = pgTable('client_room', {
   client_room_id: bigserial('client_room_id', { mode: 'bigint' }).primaryKey(),
@@ -56,7 +57,7 @@ export const clientRoomValidationSchema = z
     room_id: z.number(),
     start_date: z.string(),
     end_date: z.string().optional(),
-    status: statusEnum as unknown as z.ZodType<typeof statusEnum>,
+    status: z.enum(clientRoomStatus),
   })
   .refine(
     (data) => {
