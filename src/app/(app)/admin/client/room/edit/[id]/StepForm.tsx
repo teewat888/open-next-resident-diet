@@ -1,5 +1,11 @@
 'use client';
-import { getAvailableRooms, getClientInfo, getWings } from '@/app/actions';
+import {
+  AvailableRoom,
+  getAvailableRooms,
+  getClientInfo,
+  getWings,
+  isClientInRoom,
+} from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -12,17 +18,28 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Client, Room, Wing } from '@/lib/db/schema';
+import { Client, Wing } from '@/lib/db/schema';
 
 import { useEffect, useState } from 'react';
 import { ClientRoomForm } from './ClientRoomForm';
+import { z } from 'zod';
+import FieldErrorClient from '@/components/composed/FieldErrorClient';
+
+const locationSchema = z.object({
+  wing: z.string().min(1, 'Select a wing'),
+  room: z.string().min(1, 'Select a room'),
+});
 
 const StepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
   const [client, setClient] = useState({} as Client);
-  const [rooms, setRooms] = useState([] as Room[]);
+  const [rooms, setRooms] = useState([] as AvailableRoom[]);
   const [selectedRoom, setSelectedRoom] = useState('');
   const [selectedWing, setSelectedWing] = useState('' as Wing['id'] | '0');
+  const [validationErrors, setValidationErrors] = useState(
+    null as null | z.ZodIssue[]
+  );
+  const [isClientAlreadyInRoom, setIsClientAlreadyInRoom] = useState(false);
 
   const wingOptions = wings.map((wing) => (
     <SelectItem key={wing.id} value={wing.id.toString()}>
@@ -31,8 +48,9 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   ));
 
   const roomOptions = rooms.map((room) => (
-    <SelectItem key={room.id} value={room.id.toString()}>
-      {room.room_number}
+    <SelectItem key={room.room_id} value={room.room_id.toString()}>
+      {room.room_number}{' '}
+      {room.next_available_date ? `(${room.next_available_date})` : ''}
     </SelectItem>
   ));
 
@@ -44,6 +62,28 @@ const StepForm = ({ clientId }: { clientId: string }) => {
     })();
   };
 
+  const handleSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // const formData = new FormData(e.currentTarget);
+    const result = locationSchema.safeParse({
+      wing: selectedWing.toString(),
+      room: selectedRoom,
+    });
+
+    if (result.success) {
+      setValidationErrors(null);
+    } else {
+      setValidationErrors(result.error.issues);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      const isClientAlreadyInRoom = await isClientInRoom(clientId);
+      setIsClientAlreadyInRoom(isClientAlreadyInRoom);
+    })();
+  }, []);
+
   useEffect(() => {
     (async () => {
       const wings = await getWings();
@@ -52,11 +92,14 @@ const StepForm = ({ clientId }: { clientId: string }) => {
       setClient(client[0]);
     })();
   }, []);
-
+  console.log('validationErrors', validationErrors);
   return (
     <>
       <div className='relative flex-col items-start gap-8 md:flex pt-6'>
-        <form action={() => {}} className='grid w-full items-start gap-6'>
+        <form
+          onSubmit={handleSubmission}
+          className='grid w-full items-start gap-6'
+        >
           <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-1/2 m-auto'>
             <fieldset
               className={`grid gap-6 rounded-lg border p-4 
@@ -71,12 +114,16 @@ const StepForm = ({ clientId }: { clientId: string }) => {
               </legend>
               <div className='grid gap-3'>
                 <Label htmlFor='wing'>Select a wing</Label>
-                <Select onValueChange={handleSelectWing}>
+                <Select name={'wing'} onValueChange={handleSelectWing}>
                   <SelectTrigger>
                     <SelectValue placeholder='Select a wing' />
                   </SelectTrigger>
                   <SelectContent>{wingOptions}</SelectContent>
                 </Select>
+                <FieldErrorClient
+                  fieldName='wing'
+                  errors={validationErrors ?? []}
+                />
               </div>
               {rooms.length > 0 && (
                 <>
@@ -94,6 +141,10 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                       <SelectContent>{roomOptions}</SelectContent>
                     </Select>
                   </div>
+                  <FieldErrorClient
+                    fieldName='room'
+                    errors={validationErrors ?? []}
+                  />
                 </>
               )}
               {selectedRoom && (
@@ -119,7 +170,13 @@ const StepForm = ({ clientId }: { clientId: string }) => {
               <Button type='button' className='w-1/2' variant={'secondary'}>
                 Skip
               </Button>
-              <Button type='submit' className='w-1/2'>
+              <Button
+                type='submit'
+                className='w-1/2'
+                disabled={
+                  !isClientAlreadyInRoom && !!selectedRoom && !!selectedWing
+                }
+              >
                 Next
               </Button>
             </div>

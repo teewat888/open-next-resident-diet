@@ -8,7 +8,7 @@ import { client } from './client';
 import { room } from './room';
 import { DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE } from '@/constant/validation';
 
-const clientRoomStatus = [
+export const clientRoomStatus = [
   'active',
   'schduled',
   'completed',
