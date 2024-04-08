@@ -10,24 +10,14 @@ import {
 import {
   FormState,
   fromErrorToFormState,
+  toFormState,
 } from '@/lib/utils/fromErrorToFormState';
 
-//clientRoomStatus: readonly ["active", "schduled", "completed", "cancelled"]
-const getClientRoomStatus = ({
-  start_date,
-  end_date,
-}: {
-  start_date: string;
-  end_date: string | undefined;
-}) => {
-  console.log(start_date, end_date);
-  return clientRoomStatus[0];
-};
-
 export async function createClientRoom(
-  formState: FormState,
+  FormState: FormState,
   formData: FormData
 ) {
+  console.log('call createClientRoom');
   try {
     const result = clientRoomValidationSchema.parse({
       client_id: formData.get('client_id'),
@@ -36,20 +26,19 @@ export async function createClientRoom(
       end_date: formData.get('end_date'),
       status: formData.get('status'),
     });
-    const clientRoomStatus = getClientRoomStatus({
-      start_date: result.start_date,
-      end_date: result.end_date,
-    });
+
     await db.insert(clientRoom).values({
       client_id: result.client_id,
       room_id: result.room_id,
       start_date: result.start_date,
       end_date: result.end_date,
-      status: 'active',
+      status: result.status,
     });
   } catch (error) {
+    console.log('catch error', error);
     return fromErrorToFormState(error);
   }
+  return toFormState('SUCCESS', 'Room config successfully', '');
 }
 
 export const isClientInRoom = async (clientId: string) => {

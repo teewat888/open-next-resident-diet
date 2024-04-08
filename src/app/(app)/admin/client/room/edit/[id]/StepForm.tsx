@@ -1,6 +1,7 @@
 'use client';
 import {
   AvailableRoom,
+  createClientRoom,
   getAvailableRooms,
   getClientInfo,
   getWings,
@@ -39,6 +40,8 @@ import {
   ADMIT_DATE_REQUIRED,
   DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE,
 } from '@/constant/validation';
+import { useFormState } from 'react-dom';
+import { EMPTY_FORM_STATE } from '@/lib/utils/fromErrorToFormState';
 
 const locationSchema = z
   .object({
@@ -66,16 +69,11 @@ const locationSchema = z
     }
   );
 
-// const extendedLocationSchema = locationSchema.extend({
-//   start_date: z.string().min(1, 'Please config stay option'),
-//   end_date: z.string(),
-// });
-
 const StepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
   const [client, setClient] = useState({} as Client);
   const [rooms, setRooms] = useState([] as AvailableRoom[]);
-
+  const [formState] = useFormState(createClientRoom, EMPTY_FORM_STATE);
   const [currentSchema, setCurrentSchema] = useState(locationSchema);
 
   const [isClientAlreadyInRoom, setIsClientAlreadyInRoom] = useState(false);
@@ -90,7 +88,21 @@ const StepForm = ({ clientId }: { clientId: string }) => {
     },
   });
 
-  // const selectedRoom = form.watch('room');
+  const clientRoomStatus = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(form.getValues('start_date') as string);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(form.getValues('end_date') as string);
+    endDate.setHours(0, 0, 0, 0);
+    let status = 'scheduled';
+    if (startDate.getTime() <= today.getTime()) {
+      status = 'active';
+    } else if (endDate.getTime() < today.getTime()) {
+      status = 'completed';
+    }
+    return status;
+  };
 
   const wingOptions = wings.map((wing) => (
     <SelectItem key={wing.id} value={wing.id.toString()}>
@@ -113,13 +125,22 @@ const StepForm = ({ clientId }: { clientId: string }) => {
     })();
   };
 
-  const onSubmit = (values: z.infer<typeof locationSchema>) => {
-    console.log(values);
-  };
+  const onSubmit = async (values: z.infer<typeof locationSchema>) => {
+    const formData = new FormData();
+    for (const key in values) {
+      if (values.hasOwnProperty(key) && key !== 'wing') {
+        const value = values[key as keyof typeof values];
+        if (value !== undefined) {
+          formData.append(key, value);
+        }
+      }
+    }
+    // add client id
+    formData.append('client_id', clientId);
+    formData.append('status', clientRoomStatus());
 
-  // useEffect(() => {
-  //   setCurrentSchema(selectedRoom ? extendedLocationSchema : locationSchema);
-  // }, [selectedRoom]);
+    await createClientRoom(formState, formData);
+  };
 
   useEffect(() => {
     (async () => {
@@ -157,7 +178,6 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                     <Skeleton className='h-4 w-[200px]' />
                   )}
                 </legend>
-
                 <FormField
                   control={form.control}
                   name='wing'

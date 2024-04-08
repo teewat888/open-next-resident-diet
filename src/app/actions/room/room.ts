@@ -21,7 +21,7 @@ export async function getAvailableRooms(wingId: string) {
       clientRoom,
       and(
         eq(clientRoom.room_id, room.id),
-        inArray(clientRoom.status, ['active', 'schduled'])
+        inArray(clientRoom.status, ['active', 'scheduled'])
       )
     )
     .where(eq(room.wing_id, parseInt(wingId)))

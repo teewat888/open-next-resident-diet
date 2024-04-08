@@ -10,7 +10,7 @@ import { DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE } from '@/constant/validati
 
 export const clientRoomStatus = [
   'active',
-  'schduled',
+  'scheduled',
   'completed',
   'cancelled',
 ] as const;
