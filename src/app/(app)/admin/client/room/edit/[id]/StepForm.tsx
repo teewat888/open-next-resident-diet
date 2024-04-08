@@ -8,7 +8,6 @@ import {
 } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 
 import {
   Select,
@@ -21,39 +20,77 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Client, Wing } from '@/lib/db/schema';
 
 import { useEffect, useState } from 'react';
-import { ClientRoomForm } from './ClientRoomForm';
+
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import FieldErrorClient from '@/components/composed/FieldErrorClient';
+
 import { useForm } from 'react-hook-form';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { DatePicker } from '@/components/composed/DatePicker';
+import {
+  ADMIT_DATE_REQUIRED,
+  DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE,
+} from '@/constant/validation';
 
-const locationSchema = z.object({
-  wing: z.string().min(1, 'Please select a wing'),
-  room: z.string().min(1, 'Please select a room'),
-});
+const locationSchema = z
+  .object({
+    wing: z.string().min(1, 'Please select a wing'),
+    room: z.string().min(1, 'Please select a room'),
+    start_date: z.string().optional(),
+    end_date: z.string().optional(),
+  })
+  .refine((data) => (data.room ? !!data.start_date : true), {
+    message: ADMIT_DATE_REQUIRED,
+    path: ['start_date'],
+  })
+  .refine(
+    (data) => {
+      if (data.start_date && data.end_date) {
+        const startDate = new Date(data.start_date);
+        const endDate = new Date(data.end_date);
+        return startDate < endDate;
+      }
+      return true;
+    },
+    {
+      message: DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE,
+      path: ['end_date'],
+    }
+  );
+
+// const extendedLocationSchema = locationSchema.extend({
+//   start_date: z.string().min(1, 'Please config stay option'),
+//   end_date: z.string(),
+// });
 
 const StepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
   const [client, setClient] = useState({} as Client);
   const [rooms, setRooms] = useState([] as AvailableRoom[]);
 
+  const [currentSchema, setCurrentSchema] = useState(locationSchema);
+
   const [isClientAlreadyInRoom, setIsClientAlreadyInRoom] = useState(false);
 
   const form = useForm<z.infer<typeof locationSchema>>({
-    resolver: zodResolver(locationSchema),
+    resolver: zodResolver(currentSchema),
     defaultValues: {
       wing: '',
       room: '',
+      start_date: '',
+      end_date: '',
     },
   });
+
+  // const selectedRoom = form.watch('room');
 
   const wingOptions = wings.map((wing) => (
     <SelectItem key={wing.id} value={wing.id.toString()}>
@@ -72,12 +109,18 @@ const StepForm = ({ clientId }: { clientId: string }) => {
     (async () => {
       const rooms = await getAvailableRooms(value);
       setRooms(rooms);
+      form.setValue('room', '');
     })();
   };
 
   const onSubmit = (values: z.infer<typeof locationSchema>) => {
     console.log(values);
   };
+
+  // useEffect(() => {
+  //   setCurrentSchema(selectedRoom ? extendedLocationSchema : locationSchema);
+  // }, [selectedRoom]);
+
   useEffect(() => {
     (async () => {
       const isClientAlreadyInRoom = await isClientInRoom(clientId);
@@ -102,7 +145,7 @@ const StepForm = ({ clientId }: { clientId: string }) => {
             onSubmit={form.handleSubmit(onSubmit)}
             className='grid w-full items-start gap-6'
           >
-            <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-1/2 m-auto'>
+            <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-3/4 w-full m-auto'>
               <fieldset
                 className={`grid gap-6 rounded-lg border p-4 
               }`}
@@ -114,83 +157,108 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                     <Skeleton className='h-4 w-[200px]' />
                   )}
                 </legend>
-                <div className='grid gap-3'>
-                  <FormField
-                    control={form.control}
-                    name='wing'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            name={field.name}
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              handleSelectWing(value);
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue
-                                placeholder='Select a wing'
-                                ref={field.ref}
-                              />
-                            </SelectTrigger>
-                            <SelectContent>{wingOptions}</SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+
+                <FormField
+                  control={form.control}
+                  name='wing'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Wing</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          name={field.name}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            handleSelectWing(value);
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder='Select a wing'
+                              ref={field.ref}
+                            />
+                          </SelectTrigger>
+                          <SelectContent>{wingOptions}</SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {rooms.length > 0 && (
                   <>
-                    <div className='grid gap-3'>
-                      <FormField
-                        control={form.control}
-                        name='room'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Select
-                                value={field.value}
-                                name={field.name}
-                                onValueChange={(value) => {
-                                  field.onChange(value);
-                                }}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue
-                                    placeholder='Select a room'
-                                    ref={field.ref}
-                                  />
-                                </SelectTrigger>
-                                <SelectContent>{roomOptions}</SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name='room'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Room</FormLabel>
+                          <FormControl>
+                            <Select
+                              value={field.value}
+                              name={field.name}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder='Select a room'
+                                  ref={field.ref}
+                                />
+                              </SelectTrigger>
+                              <SelectContent>{roomOptions}</SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </>
                 )}
                 {form.getValues('room') && (
                   <>
-                    <div className='flex gap-4'>
-                      <ClientRoomForm
-                        mode={'permanent'}
-                        client={client}
-                        selectedRoom={form.getValues('room')}
-                        selectedWing={form.getValues('wing').toString()}
-                      />
-                      <ClientRoomForm
-                        mode={'temporary'}
-                        client={client}
-                        selectedRoom={form.getValues('room')}
-                        selectedWing={form.getValues('wing').toString()}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name='start_date'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Admit date</FormLabel> <br />
+                          <FormControl>
+                            <DatePicker
+                              name={field.name}
+                              value={field.value}
+                              onChange={(value) => field.onChange(value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name='end_date'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Discharge date</FormLabel>
+                          <br />
+                          <FormControl>
+                            <DatePicker
+                              name={field.name}
+                              value={field.value}
+                              onChange={(value) => field.onChange(value)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Leave discharge date blank for permanent stay.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </>
                 )}
               </fieldset>

@@ -39,7 +39,7 @@ const StepForm = () => {
     <>
       <div className='relative flex-col items-start gap-8 md:flex pt-6'>
         <form action={action} className='grid w-full items-start gap-6'>
-          <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-1/2 m-auto'>
+          <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-3/4 w-full m-auto'>
             <fieldset
               className={`grid gap-6 rounded-lg border p-4 
               }`}
