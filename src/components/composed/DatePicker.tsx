@@ -15,17 +15,22 @@ import {
 
 export function DatePicker({
   name,
-  inputWidth = 'w-[280px]',
+  onChange,
+  value,
 }: {
   name: string;
-  inputWidth?: string;
+  onChange: (value: string) => void;
+  value?: string;
 }) {
-  const [date, setDate] = React.useState<Date>();
+  const [date, setDate] = React.useState<Date | undefined>(() =>
+    value ? new Date(value) : undefined
+  );
   const [isVisible, setIsVisible] = React.useState(false);
 
   const handleDaySelect = (day: Date | undefined) => {
     setDate(day);
     setIsVisible(false);
+    if (onChange && day) onChange(day.toISOString());
   };
 
   const toggleCalendar = () => {
@@ -40,7 +45,7 @@ export function DatePicker({
           <Button
             variant={'outline'}
             className={cn(
-              `${inputWidth} justify-start text-left font-normal`,
+              `w-full justify-start text-left font-normal`,
               !date && 'text-muted-foreground'
             )}
             onClick={toggleCalendar}

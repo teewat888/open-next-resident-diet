@@ -1,7 +1,7 @@
 'use server';
 import { db } from '@/lib/db';
 import { room, clientRoom } from '@/lib/db/schema';
-import { and, eq, inArray, max, sql } from 'drizzle-orm';
+import { and, count, eq, inArray, isNotNull, max, or, sql } from 'drizzle-orm';
 
 export type AvailableRoom = {
   room_number: string;
@@ -26,5 +26,11 @@ export async function getAvailableRooms(wingId: string) {
     )
     .where(eq(room.wing_id, parseInt(wingId)))
     .groupBy(room.id)
+    .having(
+      or(
+        eq(count(clientRoom.client_id), 0),
+        isNotNull(max(clientRoom.end_date))
+      )
+    )
     .orderBy(sql`LPAD(room.room_number, 10, '0')`);
 }

@@ -56,7 +56,7 @@ export const clientRoomValidationSchema = z
     client_id: z.string(),
     room_id: z.number(),
     start_date: z.string(),
-    end_date: z.string().optional(),
+    end_date: z.string().optional().nullable(),
     status: z.enum(clientRoomStatus),
   })
   .refine(

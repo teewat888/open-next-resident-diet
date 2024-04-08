@@ -46,11 +46,11 @@ import { EMPTY_FORM_STATE } from '@/lib/utils/fromErrorToFormState';
 const locationSchema = z
   .object({
     wing: z.string().min(1, 'Please select a wing'),
-    room: z.string().min(1, 'Please select a room'),
+    room_id: z.string().min(1, 'Please select a room'),
     start_date: z.string().optional(),
     end_date: z.string().optional(),
   })
-  .refine((data) => (data.room ? !!data.start_date : true), {
+  .refine((data) => (data.room_id ? !!data.start_date : true), {
     message: ADMIT_DATE_REQUIRED,
     path: ['start_date'],
   })
@@ -81,10 +81,10 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   const form = useForm<z.infer<typeof locationSchema>>({
     resolver: zodResolver(currentSchema),
     defaultValues: {
-      wing: '',
-      room: '',
-      start_date: '',
-      end_date: '',
+      wing: undefined,
+      room_id: undefined,
+      start_date: undefined,
+      end_date: undefined,
     },
   });
 
@@ -120,8 +120,9 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   const handleSelectWing = (value: string) => {
     (async () => {
       const rooms = await getAvailableRooms(value);
+      console.log('rooms', rooms);
       setRooms(rooms);
-      form.setValue('room', '');
+      form.setValue('room_id', '');
     })();
   };
 
@@ -211,7 +212,7 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                   <>
                     <FormField
                       control={form.control}
-                      name='room'
+                      name='room_id'
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Room</FormLabel>
@@ -238,7 +239,7 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                     />
                   </>
                 )}
-                {form.getValues('room') && (
+                {form.getValues('room_id') && (
                   <>
                     <FormField
                       control={form.control}
