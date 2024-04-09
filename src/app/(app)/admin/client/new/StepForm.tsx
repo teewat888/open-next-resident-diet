@@ -2,7 +2,6 @@
 import { createClient } from '@/app/actions';
 import Loading from '@/components/composed/Loading';
 import { SubmitButton } from '@/components/composed/SubmitButton';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -19,16 +18,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-import { useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const StepForm = () => {
   const [photoSrc, setPhotoSrc] = useState('');
+
   const router = useRouter();
+
   const { prepareFormData } =
     usePrepareFormData<z.infer<typeof clientValidationSchema>>();
+
   const form = useForm<z.infer<typeof clientValidationSchema>>({
     resolver: zodResolver(clientValidationSchema),
     defaultValues: {
@@ -37,6 +39,8 @@ const StepForm = () => {
       photo: '',
     },
   });
+
+  const [isPending, startTransition] = useTransition();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,12 +54,17 @@ const StepForm = () => {
   };
 
   const onSubmit = async (values: z.infer<typeof clientValidationSchema>) => {
-    const formData = prepareFormData(values, {});
-    const result = await createClient(formData);
-    if (result.status === STATUS.SUCCESS) {
-      router.push(`/admin/client/room/edit/${result.id}`);
-    }
+    startTransition(async () => {
+      const formData = prepareFormData(values, {});
+      const result = await createClient(formData);
+      if (result.status === STATUS.SUCCESS) {
+        router.push(`/admin/client/room/edit/${result.id}`);
+      }
+    });
   };
+  useEffect(() => {
+    console.log('formState', form.formState);
+  }, [form.formState]);
 
   return (
     <>
@@ -135,13 +144,12 @@ const StepForm = () => {
                 )}
               </fieldset>
               <div className='flex justify-end'>
-                <Button
+                <SubmitButton
                   variant={'default'}
-                  disabled={form.formState.isSubmitting}
-                  type='submit'
-                >
-                  {form.formState.isSubmitting ? <Loading /> : 'Next'}
-                </Button>
+                  loading={<Loading />}
+                  label={'Next'}
+                  isSubmmitting={isPending}
+                />
               </div>
             </div>
           </form>

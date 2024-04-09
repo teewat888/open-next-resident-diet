@@ -4,7 +4,6 @@ import { db } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import {
   clientRoom,
-  clientRoomStatus,
   clientRoomValidationSchema,
 } from '@/lib/db/schema/clientRoom';
 import {
@@ -12,11 +11,9 @@ import {
   fromErrorToFormState,
   toFormState,
 } from '@/lib/utils/fromErrorToFormState';
+import { STATUS } from '@/constant';
 
-export async function createClientRoom(
-  FormState: FormState,
-  formData: FormData
-) {
+export async function createClientRoom(formData: FormData) {
   let clientId;
   try {
     const result = clientRoomValidationSchema.parse({
@@ -38,7 +35,11 @@ export async function createClientRoom(
     console.log('catch error', error);
     return fromErrorToFormState(error);
   }
-  return toFormState('SUCCESS', 'Room config successfully', clientId);
+  return {
+    status: STATUS.SUCCESS,
+    message: 'Room config successfully',
+    id: clientId,
+  };
 }
 
 export const isClientInRoom = async (clientId: string) => {

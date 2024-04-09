@@ -1,4 +1,5 @@
-import { useFormStatus } from 'react-dom';
+'use client';
+
 import { Button, buttonVariants } from '../ui/button';
 import { type VariantProps } from 'class-variance-authority';
 
@@ -8,18 +9,18 @@ type SubmitButtonProps = {
   label: string;
   loading: React.ReactNode;
   variant: ButtonVariant;
+  isSubmmitting?: boolean;
 };
 
 export const SubmitButton = ({
   label,
   loading,
   variant,
+  isSubmmitting,
 }: SubmitButtonProps) => {
-  const { pending } = useFormStatus();
-
   return (
-    <Button variant={variant} disabled={pending} type='submit'>
-      {pending ? loading : label}
+    <Button variant={variant} disabled={isSubmmitting} type='submit'>
+      {isSubmmitting ? loading : label}
     </Button>
   );
 };

@@ -20,7 +20,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Client, Wing } from '@/lib/db/schema';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,11 +40,11 @@ import {
   ADMIT_DATE_REQUIRED,
   DISCHARGE_DATE_MUST_GREATER_THAN_ADMIT_DATE,
 } from '@/constant/validation';
-import { useFormState } from 'react-dom';
-import { EMPTY_FORM_STATE } from '@/lib/utils/fromErrorToFormState';
 import { useRouter } from 'next/navigation';
 import { SubmitButton } from '@/components/composed/SubmitButton';
 import Loading from '@/components/composed/Loading';
+import usePrepareFormData from '@/hooks/usePrepareFormData';
+import { STATUS } from '@/constant';
 
 const locationSchema = z
   .object({
@@ -76,12 +76,16 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
   const [client, setClient] = useState({} as Client);
   const [rooms, setRooms] = useState([] as AvailableRoom[]);
-  const [formState] = useFormState(createClientRoom, EMPTY_FORM_STATE);
   const [currentSchema, setCurrentSchema] = useState(locationSchema);
 
   const [isClientAlreadyInRoom, setIsClientAlreadyInRoom] = useState(false);
 
   const router = useRouter();
+
+  const { prepareFormData } =
+    usePrepareFormData<z.infer<typeof locationSchema>>();
+
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof locationSchema>>({
     resolver: zodResolver(currentSchema),
@@ -131,20 +135,16 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   };
 
   const onSubmit = async (values: z.infer<typeof locationSchema>) => {
-    const formData = new FormData();
-    for (const key in values) {
-      if (values.hasOwnProperty(key) && key !== 'wing') {
-        const value = values[key as keyof typeof values];
-        if (value !== undefined) {
-          formData.append(key, value);
-        }
+    startTransition(async () => {
+      const formData = prepareFormData(values, {
+        excludeKeys: ['wing'],
+        extraData: { client_id: clientId, status: clientRoomStatus() },
+      });
+      const result = await createClientRoom(formData);
+      if (result.status === STATUS.SUCCESS) {
+        router.push(`/admin/client/meal/default/edit/${result.id}`);
       }
-    }
-    // add client id
-    formData.append('client_id', clientId);
-    formData.append('status', clientRoomStatus());
-
-    await createClientRoom(formState, formData);
+    });
   };
 
   useEffect(() => {
@@ -162,13 +162,6 @@ const StepForm = ({ clientId }: { clientId: string }) => {
       setClient(client[0]);
     })();
   }, []);
-
-  useEffect(() => {
-    console.log('formState', formState);
-    if (formState.status === 'SUCCESS') {
-      router.push(`/admin/client/meal/default/edit/${formState.id}`);
-    }
-  }, [formState, router]);
 
   return (
     <>
@@ -299,9 +292,10 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                   Skip
                 </Button>
                 <SubmitButton
-                  label={'Next'}
-                  loading={<Loading />}
                   variant={'default'}
+                  loading={<Loading />}
+                  label={'Next'}
+                  isSubmmitting={isPending}
                 />
               </div>
             </div>
