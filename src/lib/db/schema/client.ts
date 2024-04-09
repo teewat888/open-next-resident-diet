@@ -46,4 +46,5 @@ export const clientValidationSchema = z.object({
     .string()
     .min(1, { message: 'Last name is required' })
     .max(255, { message: 'Last name is too long' }),
+  photo: z.string().optional(),
 });

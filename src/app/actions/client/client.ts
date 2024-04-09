@@ -2,16 +2,13 @@
 
 import { db } from '@/lib/db';
 import { client, clientValidationSchema } from '@/lib/db/schema';
-import {
-  FormState,
-  fromErrorToFormState,
-  toFormState,
-} from '@/lib/utils/fromErrorToFormState';
+import { fromErrorToFormState } from '@/lib/utils/fromErrorToFormState';
 import { writeFile } from 'fs/promises';
 import { eq } from 'drizzle-orm';
 import { join } from 'path';
+import { STATUS } from '@/constant';
 
-export async function createClient(formState: FormState, formData: FormData) {
+export async function createClient(formData: FormData) {
   let insertedId;
 
   const file: File | null = formData.get('photo') as File;
@@ -44,7 +41,11 @@ export async function createClient(formState: FormState, formData: FormData) {
     return fromErrorToFormState(error);
   }
 
-  return toFormState('SUCCESS', 'Client created successfully', insertedId);
+  return {
+    status: STATUS.SUCCESS,
+    message: 'Client created successfully',
+    id: insertedId,
+  };
 }
 
 export async function getClientInfo(params: string) {

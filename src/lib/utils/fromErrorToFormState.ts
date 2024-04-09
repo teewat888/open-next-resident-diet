@@ -21,6 +21,7 @@ export const toFormState = (
   message: string,
   id: string
 ): FormState => {
+  console.log('toFormState', status, message, id);
   return {
     status,
     message,

@@ -17,7 +17,7 @@ export async function createClientRoom(
   FormState: FormState,
   formData: FormData
 ) {
-  console.log('call createClientRoom');
+  let clientId;
   try {
     const result = clientRoomValidationSchema.parse({
       client_id: formData.get('client_id'),
@@ -26,7 +26,7 @@ export async function createClientRoom(
       end_date: formData.get('end_date'),
       status: formData.get('status'),
     });
-
+    clientId = result.client_id;
     await db.insert(clientRoom).values({
       client_id: result.client_id,
       room_id: result.room_id,
@@ -38,7 +38,7 @@ export async function createClientRoom(
     console.log('catch error', error);
     return fromErrorToFormState(error);
   }
-  return toFormState('SUCCESS', 'Room config successfully', '');
+  return toFormState('SUCCESS', 'Room config successfully', clientId);
 }
 
 export const isClientInRoom = async (clientId: string) => {

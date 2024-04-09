@@ -16,7 +16,7 @@ const runSeed = async () => {
   if (!env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not defined');
   }
-
+  //TODO seperate seed file for each db ?
   const connection = postgres(env.DATABASE_URL, { max: 1 });
 
   const db = drizzle(connection);

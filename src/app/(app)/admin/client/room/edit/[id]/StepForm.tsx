@@ -42,6 +42,9 @@ import {
 } from '@/constant/validation';
 import { useFormState } from 'react-dom';
 import { EMPTY_FORM_STATE } from '@/lib/utils/fromErrorToFormState';
+import { useRouter } from 'next/navigation';
+import { SubmitButton } from '@/components/composed/SubmitButton';
+import Loading from '@/components/composed/Loading';
 
 const locationSchema = z
   .object({
@@ -77,6 +80,8 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   const [currentSchema, setCurrentSchema] = useState(locationSchema);
 
   const [isClientAlreadyInRoom, setIsClientAlreadyInRoom] = useState(false);
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof locationSchema>>({
     resolver: zodResolver(currentSchema),
@@ -120,7 +125,6 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   const handleSelectWing = (value: string) => {
     (async () => {
       const rooms = await getAvailableRooms(value);
-      console.log('rooms', rooms);
       setRooms(rooms);
       form.setValue('room_id', '');
     })();
@@ -158,6 +162,13 @@ const StepForm = ({ clientId }: { clientId: string }) => {
       setClient(client[0]);
     })();
   }, []);
+
+  useEffect(() => {
+    console.log('formState', formState);
+    if (formState.status === 'SUCCESS') {
+      router.push(`/admin/client/meal/default/edit/${formState.id}`);
+    }
+  }, [formState, router]);
 
   return (
     <>
@@ -284,12 +295,14 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                 )}
               </fieldset>
               <div className='flex justify-end gap-4'>
-                <Button type='button' className='w-1/2' variant={'secondary'}>
+                <Button type='button' variant={'secondary'}>
                   Skip
                 </Button>
-                <Button type='submit' className='w-1/2'>
-                  Next
-                </Button>
+                <SubmitButton
+                  label={'Next'}
+                  loading={<Loading />}
+                  variant={'default'}
+                />
               </div>
             </div>
           </form>

@@ -1,22 +1,42 @@
 'use client';
 import { createClient } from '@/app/actions';
-import { FieldError } from '@/components/composed/FieldError';
 import Loading from '@/components/composed/Loading';
 import { SubmitButton } from '@/components/composed/SubmitButton';
 import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { EMPTY_FORM_STATE } from '@/lib/utils/fromErrorToFormState';
+import { STATUS } from '@/constant';
+import usePrepareFormData from '@/hooks/usePrepareFormData';
+import { clientValidationSchema } from '@/lib/db/schema';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useFormState } from 'react-dom';
+
+import { useState } from 'react';
+
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const StepForm = () => {
   const [photoSrc, setPhotoSrc] = useState('');
-  const [formState, action] = useFormState(createClient, EMPTY_FORM_STATE);
-
   const router = useRouter();
+  const { prepareFormData } =
+    usePrepareFormData<z.infer<typeof clientValidationSchema>>();
+  const form = useForm<z.infer<typeof clientValidationSchema>>({
+    resolver: zodResolver(clientValidationSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      photo: '',
+    },
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,51 +49,103 @@ const StepForm = () => {
     }
   };
 
-  useEffect(() => {
-    if (formState.status === 'SUCCESS') {
-      router.push(`/admin/client/room/edit/${formState.id}`);
+  const onSubmit = async (values: z.infer<typeof clientValidationSchema>) => {
+    const formData = prepareFormData(values, {});
+    const result = await createClient(formData);
+    if (result.status === STATUS.SUCCESS) {
+      router.push(`/admin/client/room/edit/${result.id}`);
     }
-  }, [formState, router]);
+  };
 
   return (
     <>
       <div className='relative flex-col items-start gap-8 md:flex pt-6'>
-        <form action={action} className='grid w-full items-start gap-6'>
-          <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-3/4 w-full m-auto'>
-            <fieldset
-              className={`grid gap-6 rounded-lg border p-4 
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='grid w-full items-start gap-6'
+          >
+            <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-3/4 w-full m-auto'>
+              <fieldset
+                className={`grid gap-6 rounded-lg border p-4 
               }`}
-            >
-              <legend className='-ml-1 px-1 text-sm font-medium'>
-                General info
-              </legend>
-              <div className='grid gap-3'>
-                <Label htmlFor='firstName'>First name</Label>
-                <Input name='firstName' type='text' placeholder='First name' />
-                <FieldError formState={formState} name='firstName' />
+              >
+                <legend className='-ml-1 px-1 text-sm font-medium'>
+                  General info
+                </legend>
+                <div className='grid gap-3'>
+                  <FormField
+                    control={form.control}
+                    name='firstName'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type='text'
+                            placeholder='First name'
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className='grid gap-3'>
+                  <FormField
+                    control={form.control}
+                    name='lastName'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type='text'
+                            placeholder='First name'
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className='grid gap-3'>
+                  <FormField
+                    control={form.control}
+                    name='photo'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Photo</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type='file'
+                            onChange={handleFileChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                {photoSrc && (
+                  <Image src={photoSrc} alt='image' width={50} height={50} />
+                )}
+              </fieldset>
+              <div className='flex justify-end'>
+                <Button
+                  variant={'default'}
+                  disabled={form.formState.isSubmitting}
+                  type='submit'
+                >
+                  {form.formState.isSubmitting ? <Loading /> : 'Next'}
+                </Button>
               </div>
-              <div className='grid gap-3'>
-                <Label htmlFor='lastName'>Last name</Label>
-                <Input name='lastName' type='text' placeholder='Last name' />
-                <FieldError formState={formState} name='lastName' />
-              </div>
-              <div className='grid gap-3'>
-                <Label htmlFor='photo'>Photo</Label>
-                <Input name='photo' type='file' onChange={handleFileChange} />
-              </div>
-              {photoSrc && (
-                <Image src={photoSrc} alt='image' width={50} height={50} />
-              )}
-            </fieldset>
-            <div className='flex justify-end'>
-              <SubmitButton
-                label={'Next'}
-                loading={<Loading />}
-                variant={'default'}
-              />
             </div>
-          </div>
-        </form>
+          </form>
+        </Form>
       </div>
     </>
   );
