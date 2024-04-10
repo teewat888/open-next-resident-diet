@@ -23,7 +23,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const StepForm = () => {
+const GeneralInfoStepForm = () => {
   const [photoSrc, setPhotoSrc] = useState('');
 
   const router = useRouter();
@@ -158,4 +158,4 @@ const StepForm = () => {
     </>
   );
 };
-export default StepForm;
+export default GeneralInfoStepForm;

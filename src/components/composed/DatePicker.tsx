@@ -17,10 +17,12 @@ export function DatePicker({
   name,
   onChange,
   value,
+  nextAvailableDate,
 }: {
   name: string;
   onChange: (value: string) => void;
   value?: string;
+  nextAvailableDate?: string;
 }) {
   const [date, setDate] = React.useState<Date | undefined>(() =>
     value ? new Date(value) : undefined
@@ -60,6 +62,11 @@ export function DatePicker({
             selected={date}
             onSelect={handleDaySelect}
             initialFocus
+            disabled={
+              nextAvailableDate
+                ? { before: new Date(nextAvailableDate) }
+                : false
+            }
           />
         </PopoverContent>
       </Popover>

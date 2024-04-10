@@ -1,5 +1,5 @@
 import { Stepper } from '@/components/composed/Stepper';
-import StepForm from './StepForm';
+import StepForm from './LocationStepForm';
 
 export default async function editRoom({ params }: { params: { id: string } }) {
   return (

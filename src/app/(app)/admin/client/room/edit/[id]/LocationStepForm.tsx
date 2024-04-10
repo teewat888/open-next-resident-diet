@@ -45,6 +45,7 @@ import { SubmitButton } from '@/components/composed/SubmitButton';
 import Loading from '@/components/composed/Loading';
 import usePrepareFormData from '@/hooks/usePrepareFormData';
 import { STATUS } from '@/constant';
+import { format } from 'date-fns';
 
 const locationSchema = z
   .object({
@@ -72,11 +73,15 @@ const locationSchema = z
     }
   );
 
-const StepForm = ({ clientId }: { clientId: string }) => {
+const LocationStepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
   const [client, setClient] = useState({} as Client);
   const [rooms, setRooms] = useState([] as AvailableRoom[]);
   const [currentSchema, setCurrentSchema] = useState(locationSchema);
+
+  const [nextAvailableDate, setNextAvailableDate] = useState<
+    string | undefined
+  >(undefined);
 
   const [isClientAlreadyInRoom, setIsClientAlreadyInRoom] = useState(false);
 
@@ -122,7 +127,9 @@ const StepForm = ({ clientId }: { clientId: string }) => {
   const roomOptions = rooms.map((room) => (
     <SelectItem key={room.room_id} value={room.room_id.toString()}>
       {room.room_number}{' '}
-      {room.next_available_date ? `(${room.next_available_date})` : ''}
+      {room.next_available_date
+        ? `(will be available from ${format(room.next_available_date, 'PPP')})`
+        : ''}
     </SelectItem>
   ));
 
@@ -131,7 +138,19 @@ const StepForm = ({ clientId }: { clientId: string }) => {
       const rooms = await getAvailableRooms(value);
       setRooms(rooms);
       form.setValue('room_id', '');
+      console.log('rooms', rooms);
     })();
+  };
+
+  const handleSelectRoom = (roomId: string) => {
+    const selectedRoom = rooms.find(
+      (room) => room.room_id.toString() === roomId
+    );
+    if (selectedRoom && selectedRoom.next_available_date) {
+      setNextAvailableDate(selectedRoom.next_available_date);
+    } else {
+      setNextAvailableDate(undefined);
+    }
   };
 
   const onSubmit = async (values: z.infer<typeof locationSchema>) => {
@@ -226,6 +245,7 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                               name={field.name}
                               onValueChange={(value) => {
                                 field.onChange(value);
+                                handleSelectRoom(value);
                               }}
                             >
                               <SelectTrigger>
@@ -256,6 +276,7 @@ const StepForm = ({ clientId }: { clientId: string }) => {
                               name={field.name}
                               value={field.value}
                               onChange={(value) => field.onChange(value)}
+                              nextAvailableDate={nextAvailableDate}
                             />
                           </FormControl>
                           <FormMessage />
@@ -305,4 +326,4 @@ const StepForm = ({ clientId }: { clientId: string }) => {
     </>
   );
 };
-export default StepForm;
+export default LocationStepForm;

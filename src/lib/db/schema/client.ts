@@ -40,10 +40,12 @@ export type ClientId = z.infer<typeof clientIdSchema>['id'];
 export const clientValidationSchema = z.object({
   firstName: z
     .string()
+    .trim()
     .min(1, { message: 'First name is required' })
     .max(255, { message: 'First name is too long' }),
   lastName: z
     .string()
+    .trim()
     .min(1, { message: 'Last name is required' })
     .max(255, { message: 'Last name is too long' }),
   photo: z.string().optional(),
