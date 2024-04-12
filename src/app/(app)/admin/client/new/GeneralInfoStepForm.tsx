@@ -1,5 +1,5 @@
 'use client';
-import { createClient } from '@/app/actions';
+import { createClient } from '@/actions';
 import Loading from '@/components/composed/Loading';
 import { SubmitButton } from '@/components/composed/SubmitButton';
 import {
@@ -18,7 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -62,9 +62,6 @@ const GeneralInfoStepForm = () => {
       }
     });
   };
-  useEffect(() => {
-    console.log('formState', form.formState);
-  }, [form.formState]);
 
   return (
     <>

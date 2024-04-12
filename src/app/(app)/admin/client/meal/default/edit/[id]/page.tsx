@@ -1,5 +1,5 @@
 import { Stepper } from '@/components/composed/Stepper';
-// import StepForm from './StepForm';
+import StepForm from './MealStepForm';
 
 export default async function DefaultMealPage({
   params,
@@ -12,7 +12,7 @@ export default async function DefaultMealPage({
         <h1 className='text-lg font-semibold md:text-2xl'>Add a client</h1>
       </div>
       <Stepper currentStep='Meal size and consistency' />
-      {/* <StepForm clientId={params.id} /> */}
+      <StepForm clientId={params.id} />
     </main>
   );
 }

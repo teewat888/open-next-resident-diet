@@ -8,7 +8,7 @@ export type AvailableRoom = {
   room_id: number;
   next_available_date: string | null;
 };
-
+//TODO fix the logic to think about the schedule that might coz overlap bookings
 export async function getAvailableRooms(wingId: string) {
   let result = undefined;
   try {
