@@ -6,7 +6,7 @@ import {
   getClientInfo,
   getWings,
   isClientInRoom,
-} from '@/app/actions';
+} from '@/actions';
 
 import { Button } from '@/components/ui/button';
 
@@ -24,6 +24,8 @@ import { useEffect, useState, useTransition } from 'react';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+
+import { useClientStore } from '@/store/client';
 
 import { useForm } from 'react-hook-form';
 import {
@@ -75,9 +77,9 @@ const locationSchema = z
 
 const LocationStepForm = ({ clientId }: { clientId: string }) => {
   const [wings, setWings] = useState([] as Wing[]);
-  const [client, setClient] = useState({} as Client);
   const [rooms, setRooms] = useState([] as AvailableRoom[]);
-  const [currentSchema, setCurrentSchema] = useState(locationSchema);
+
+  const clientInfo = useClientStore((state) => state.client);
 
   const [nextAvailableDate, setNextAvailableDate] = useState<
     string | undefined
@@ -93,7 +95,7 @@ const LocationStepForm = ({ clientId }: { clientId: string }) => {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof locationSchema>>({
-    resolver: zodResolver(currentSchema),
+    resolver: zodResolver(locationSchema),
     defaultValues: {
       wing: undefined,
       room_id: undefined,
@@ -138,7 +140,6 @@ const LocationStepForm = ({ clientId }: { clientId: string }) => {
       const rooms = await getAvailableRooms(value);
       setRooms(rooms);
       form.setValue('room_id', '');
-      console.log('rooms', rooms);
     })();
   };
 
@@ -175,10 +176,29 @@ const LocationStepForm = ({ clientId }: { clientId: string }) => {
 
   useEffect(() => {
     (async () => {
-      const wings = await getWings();
-      const client = await getClientInfo(clientId);
-      setWings(wings);
-      setClient(client[0]);
+      try {
+        const [wings, client] = await Promise.all([
+          getWings(),
+          getClientInfo(clientId),
+        ]);
+        setWings(wings);
+        if (!clientInfo || clientInfo.id !== client[0].id) {
+          useClientStore.getState().setClient({
+            id: client[0].id,
+            firstName: client[0].firstName,
+            lastName: client[0].lastName,
+            photo: client[0].photo,
+            default_meal_size_id: client[0].default_meal_size_id,
+            default_food_consistency_id: client[0].default_food_consistency_id,
+            default_liquid_consistency_id:
+              client[0].default_liquid_consistency_id,
+            createdAt: client[0].createdAt,
+            updatedAt: client[0].updatedAt,
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
     })();
   }, []);
 
@@ -196,8 +216,8 @@ const LocationStepForm = ({ clientId }: { clientId: string }) => {
               }`}
               >
                 <legend className='-ml-1 px-1 text-sm font-medium'>
-                  {client.firstName ? (
-                    `Location for ${client.firstName} ${client.lastName}`
+                  {clientInfo?.firstName ? (
+                    `Location for ${clientInfo.firstName} ${clientInfo.lastName}`
                   ) : (
                     <Skeleton className='h-4 w-[200px]' />
                   )}
@@ -296,6 +316,7 @@ const LocationStepForm = ({ clientId }: { clientId: string }) => {
                               name={field.name}
                               value={field.value}
                               onChange={(value) => field.onChange(value)}
+                              nextAvailableDate={nextAvailableDate}
                             />
                           </FormControl>
                           <FormDescription>
