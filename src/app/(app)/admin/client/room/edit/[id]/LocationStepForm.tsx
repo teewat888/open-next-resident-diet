@@ -85,7 +85,7 @@ const LocationStepForm = ({ clientId }: { clientId: string }) => {
     string | undefined
   >(undefined);
 
-  const [isClientAlreadyInRoom, setIsClientAlreadyInRoom] = useState(false);
+  //TODO since we already got array of room and it info, use that to filter disabled range of calendar
 
   const router = useRouter();
 
@@ -166,13 +166,6 @@ const LocationStepForm = ({ clientId }: { clientId: string }) => {
       }
     });
   };
-
-  useEffect(() => {
-    (async () => {
-      const isClientAlreadyInRoom = await isClientInRoom(clientId);
-      setIsClientAlreadyInRoom(isClientAlreadyInRoom);
-    })();
-  }, []);
 
   useEffect(() => {
     (async () => {
