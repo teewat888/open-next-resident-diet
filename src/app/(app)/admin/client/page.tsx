@@ -1,24 +1,39 @@
+import { getAllClient } from '@/actions';
 import PageHeader from '@/components/composed/PageHeader';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { DataTable } from './data-table';
+import { columns } from './columns';
 
-export default function ClientManagementPage() {
+export default async function ClientManagementPage() {
+  const clients = await getAllClient();
   return (
     <>
       <PageHeader headerText='Client Managment' />
-      <div className='flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm'>
-        <div className='flex flex-col items-center gap-1 text-center'>
-          <h3 className='text-2xl font-bold tracking-tight'>
-            You have no products
-          </h3>
-          <p className='text-sm text-muted-foreground'>
-            You can start selling as soon as you add a product.
-          </p>
+      {clients.length > 0 && (
+        <>
           <Link href='/admin/client/new'>
-            {' '}
             <Button className='mt-4'>Add Client</Button>
           </Link>
-        </div>
+        </>
+      )}
+
+      <div className='flex flex-1  justify-center rounded-lg border border-dashed shadow-sm'>
+        {clients.length === 0 && (
+          <>
+            <div className='flex flex-col items-center gap-1 text-center'>
+              <h3 className='text-2xl font-bold tracking-tight'>
+                You have no client
+              </h3>
+
+              <Link href='/admin/client/new'>
+                {' '}
+                <Button className='mt-4'>Add Client</Button>{' '}
+              </Link>
+            </div>
+          </>
+        )}
+        <DataTable columns={columns} data={clients} />
       </div>
     </>
   );

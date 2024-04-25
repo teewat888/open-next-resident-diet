@@ -50,3 +50,8 @@ export const clientValidationSchema = z.object({
     .max(255, { message: 'Last name is too long' }),
   photo: z.string().optional(),
 });
+export const mealSchema = z.object({
+  default_meal_size_id: z.number().optional(),
+  default_food_consistency_id: z.number().optional(),
+  default_liquid_consistency_id: z.number().optional(),
+});

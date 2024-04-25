@@ -51,3 +51,7 @@ export async function createClient(formData: FormData) {
 export async function getClientInfo(params: string) {
   return await db.select().from(client).where(eq(client.id, params)).limit(1);
 }
+
+export async function getAllClient() {
+  return await db.select().from(client);
+}

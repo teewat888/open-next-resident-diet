@@ -3,6 +3,7 @@ import {
   getFoodConsistency,
   getLiquidConsistency,
   getMealSize,
+  updateMealConsistency,
 } from '@/actions';
 import Loading from '@/components/composed/Loading';
 import { SubmitButton } from '@/components/composed/SubmitButton';
@@ -22,17 +23,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FoodConsistency, LiquidConsistency, MealSize } from '@/lib/db/schema';
+import { STATUS } from '@/constant';
+import usePrepareFormData from '@/hooks/usePrepareFormData';
+import {
+  FoodConsistency,
+  LiquidConsistency,
+  MealSize,
+  mealSchema,
+} from '@/lib/db/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
-import { ControllerRenderProps, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
-const mealSchema = z.object({
-  default_meal_size_id: z.number().optional(),
-  default_food_consistency_id: z.number().optional(),
-  default_liquid_consistency_id: z.number().optional(),
-});
 
 const MealStepForm = ({ clientId }: { clientId: string }) => {
   const [mealSize, setMealSize] = useState([] as MealSize[]);
@@ -42,6 +45,10 @@ const MealStepForm = ({ clientId }: { clientId: string }) => {
   const [liquidConsistency, setLiquidConsistency] = useState(
     [] as LiquidConsistency[]
   );
+
+  const { prepareFormData } = usePrepareFormData<z.infer<typeof mealSchema>>();
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof mealSchema>>({
     resolver: zodResolver(mealSchema),
@@ -81,6 +88,16 @@ const MealStepForm = ({ clientId }: { clientId: string }) => {
     }
   };
 
+  const onSubmit = async (values: z.infer<typeof mealSchema>) => {
+    startTransition(async () => {
+      const formData = prepareFormData(values, {});
+      const result = await updateMealConsistency(formData, clientId);
+      if (result.status === STATUS.SUCCESS) {
+        router.push(`/admin/client/finish/${result.id}`);
+      }
+    });
+  };
+
   useEffect(() => {
     (async () => {
       try {
@@ -103,7 +120,10 @@ const MealStepForm = ({ clientId }: { clientId: string }) => {
     <>
       <div className='relative flex-col items-start gap-8 md:flex pt-6'>
         <Form {...form}>
-          <form className='grid w-full items-start gap-6'>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='grid w-full items-start gap-6'
+          >
             <div className='grid grid-cols-1 md:grid-cols-1 gap-6 md:w-3/4 w-full m-auto'>
               <fieldset
                 className={`grid gap-6 rounded-lg border p-4 
