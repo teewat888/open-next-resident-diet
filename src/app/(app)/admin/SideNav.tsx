@@ -1,8 +1,10 @@
+import { getTotalClientCount } from '@/actions';
 import { Badge } from '@/components/ui/badge';
 import { Home, LineChart, Package, ShoppingCart, Users } from 'lucide-react';
 import Link from 'next/link';
 
-const SideNav = () => {
+const SideNav = async () => {
+  const totalClientCount = await getTotalClientCount();
   return (
     <nav className='grid items-start px-2 text-sm font-medium lg:px-4'>
       <Link
@@ -20,7 +22,7 @@ const SideNav = () => {
         <Users className='h-4 w-4' />
         Clients
         <Badge className='ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full'>
-          6
+          {totalClientCount[0].count}
         </Badge>
       </Link>
       <Link

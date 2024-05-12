@@ -29,7 +29,11 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import CompanyHeader from './CompanyHeader';
 import SideNav from './SideNav';
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <>
       {' '}
@@ -107,14 +111,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </Sheet>
             <div className='w-full flex-1'>
               <form>
-                <div className='relative'>
-                  <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
-                  <Input
-                    type='search'
-                    placeholder='Search clients...'
-                    className='w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3'
-                  />
-                </div>
+                <h1 className='text-lg font-semibold md:text-3xl'>
+                  Next gen dietary management
+                </h1>
               </form>
             </div>
             <DropdownMenu>

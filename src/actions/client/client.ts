@@ -1,12 +1,13 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { client, clientValidationSchema } from '@/lib/db/schema';
+import { client, clientValidationSchema, mealSize } from '@/lib/db/schema';
 import { fromErrorToFormState } from '@/lib/utils/fromErrorToFormState';
 import { writeFile } from 'fs/promises';
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import { join } from 'path';
 import { STATUS } from '@/constant';
+import { revalidateClient } from '@/lib/utils/revalidate';
 
 export async function createClient(formData: FormData) {
   let insertedId;
@@ -40,7 +41,7 @@ export async function createClient(formData: FormData) {
     console.log('catch error', error);
     return fromErrorToFormState(error);
   }
-
+  revalidateClient();
   return {
     status: STATUS.SUCCESS,
     message: 'Client created successfully',
@@ -52,6 +53,13 @@ export async function getClientInfo(params: string) {
   return await db.select().from(client).where(eq(client.id, params)).limit(1);
 }
 
-export async function getAllClient() {
-  return await db.select().from(client);
+export async function getAllClientInfo() {
+  return await db
+    .select()
+    .from(client)
+    .leftJoin(mealSize, eq(client.default_meal_size_id, mealSize.id));
+}
+
+export async function getTotalClientCount() {
+  return await db.select({ count: count() }).from(client);
 }

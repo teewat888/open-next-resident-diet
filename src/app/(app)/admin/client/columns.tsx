@@ -1,15 +1,48 @@
 'use client';
 
-import { Client } from '@/lib/db/schema';
+import { Button } from '@/components/ui/button';
+import { Client, MealSize } from '@/lib/db/schema';
 import { ColumnDef } from '@tanstack/react-table';
+import { ArrowUpDown } from 'lucide-react';
 
-export const columns: ColumnDef<Client>[] = [
+export interface ClientWithDetails {
+  client: Client;
+  meal_size: MealSize | null;
+}
+
+export const columns: ColumnDef<ClientWithDetails>[] = [
   {
-    accessorKey: 'firstName',
-    header: 'First Name',
+    accessorKey: 'client.firstName',
+    id: 'firstName',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          First name
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      );
+    },
   },
   {
-    accessorKey: 'lastName',
-    header: 'Last Name',
+    accessorKey: 'client.lastName',
+    id: 'lastName',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Last name
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </Button>
+      );
+    },
+  },
+  {
+    accessorKey: 'meal_size.size_name',
+    header: 'Meal size',
   },
 ];
